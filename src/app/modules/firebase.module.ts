@@ -3,11 +3,7 @@ import { CommonModule } from '@angular/common';
 import { environment } from 'src/environments/environment';
 
 import { AngularFireMessagingModule } from '@angular/fire/messaging';
-import {
-  AngularFireFunctionsModule,
-  ORIGIN,
-  REGION,
-} from '@angular/fire/functions';
+import { AngularFireFunctionsModule } from '@angular/fire/functions';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
