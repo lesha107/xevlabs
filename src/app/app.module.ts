@@ -8,22 +8,23 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { AuthGuard } from './guards/auth.guard';
 import { FirebaseModule } from './modules/firebase.module';
+import { SharedModule } from './modules/shared.module';
+import { ToastrModule } from 'ngx-toastr';
 
 @NgModule({
   declarations: [AppComponent],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    AppRoutingModule,
     FirebaseModule,
+    AppRoutingModule,
+    SharedModule,
     FormlyModule.forRoot({
       validationMessages: [
         { name: 'required', message: 'This field is required' },
       ],
     }),
-    ReactiveFormsModule,
-    FormlyModule.forRoot({ extras: { lazyRender: true } }),
-    FormlyMaterialModule,
+    ToastrModule.forRoot(),
   ],
   providers: [AuthGuard],
   bootstrap: [AppComponent],

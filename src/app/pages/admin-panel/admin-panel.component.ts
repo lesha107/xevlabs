@@ -3,10 +3,11 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { User } from 'firebase';
 import { combineLatest, Observable, Subject, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
-import { userOptions } from 'src/app/models/userOptions';
+import { UserOptions } from 'src/app/models/UserOptions';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user.service';
 
@@ -46,20 +47,32 @@ export class AdminPanelComponent implements OnInit {
   paginationList: any[];
   filterType: string;
   campaignOne: FormGroup;
+  date: any;
+  //_____________
+  roleSubject = new Subject();
+  dateSubject = new Subject();
+  pagintationSubject = new Subject<any>();
+  originalItems$ = new Observable<any>();
+
   constructor(
     private _userService: UserService,
     private _authService: AuthService,
     public dialog: MatDialog
   ) {
-    this._userService.getUsers().subscribe((e) => {
-      this.usersList = [...e];
-      this.OnPageChange({
-        length: 0,
-        pageIndex: 0,
-        pageSize: 1,
-        previousPageIndex: 0,
-      });
-    });
+    // this._userService.getUsers().subscribe((e) => {
+    //   this.usersList = [...e];
+    //   this.OnPageChange({
+    //     length: 0,
+    //     pageIndex: 0,
+    //     pageSize: 1,
+    //     previousPageIndex: 0,
+    //   });
+    // });
+    this.originalItems$ = this._userService.getUsers();
+
+    this.roleSubject.next(this.filterType);
+    this.dateSubject.next(this.date);
+
     const today = new Date();
     const month = today.getMonth();
     const year = today.getFullYear();
@@ -69,10 +82,25 @@ export class AdminPanelComponent implements OnInit {
       end: new FormControl(new Date(year, month, 16)),
     });
 
-    this.campaignOne.valueChanges.subscribe((e) => console.log('date1', e));
+    this.campaignOne.valueChanges.subscribe((e) => (this.date = e));
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    const filteredItems$ = combineLatest([
+      this.originalItems$,
+      this.roleSubject,
+      this.dateSubject,
+    ])
+      .pipe(
+        tap((e) => console.log('tap', e)),
+        map(([originalItems, role, date]) =>
+          originalItems.filter(
+            (item) => item.role === role && item.date === date
+          )
+        )
+      )
+      .subscribe((e) => console.log('combine', e));
+  }
 
   openDialog(): void {
     const dialogRef = this.dialog.open(DialogComponent, {
@@ -81,7 +109,9 @@ export class AdminPanelComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       console.log('The dialog was closed', result);
-      this.createUser(result);
+      if (result.name) {
+        this.createUser(result);
+      }
     });
   }
 

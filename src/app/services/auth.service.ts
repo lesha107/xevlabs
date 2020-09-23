@@ -5,7 +5,7 @@ import {
   AngularFirestore,
   AngularFirestoreCollection,
 } from '@angular/fire/firestore';
-import { userOptions } from '../models/userOptions';
+import { UserOptions } from '../models/UserOptions';
 // import ActionCodeSettings = firebase.auth.ActionCodeSettings;
 @Injectable({
   providedIn: 'root',
@@ -26,7 +26,7 @@ export class AuthService {
   }
 
   createUser(
-    data: userOptions
+    data: UserOptions
   ): Observable<Partial<firebase.auth.UserCredential>> {
     console.log('data', data);
     return from(

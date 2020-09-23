@@ -3,7 +3,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
-import { userOptions } from '../models/userOptions';
+import { UserOptions } from '../models/UserOptions';
 import { initFirestoreData } from '../utils/firestore';
 
 @Injectable({
@@ -24,11 +24,11 @@ export class UserService {
       .pipe(map(initFirestoreData));
   }
 
-  isAdmin(): Observable<userOptions> {
+  isAdmin(): Observable<UserOptions> {
     return this.currentUser$.pipe(
       filter((user) => !!user?.uid),
       switchMap((user) =>
-        this._afs.collection('users').doc<userOptions>(user.uid).valueChanges()
+        this._afs.collection('users').doc<UserOptions>(user.uid).valueChanges()
       )
     );
   }

@@ -1,4 +1,4 @@
-export interface userOptions {
+export interface UserOptions {
   name: string;
   number: string;
   email: string;
