@@ -1,6 +1,6 @@
 <mat-form-field appearance="fill">
   <mat-label>Filter By role</mat-label>
-  <mat-select [(ngModel)]="filterType">
+  <mat-select (selectionChange)="onChangeRole($event)">
     <mat-option value="admin">admin</mat-option>
     <mat-option value="user">user</mat-option>
   </mat-select>
@@ -26,16 +26,16 @@
   </mat-form-field>
 </div>
 <div class="user__list">
-  <mat-list *ngFor="let user of paginationList">
+  <mat-list *ngFor="let user of paginatedItems$ | async">
     <mat-list-item>
       <mat-label>
         {{ user.id }}
       </mat-label>
-      <mat-label>{{ user.birthday.toDate() | date }} </mat-label>
+      <mat-label> {{ user.birthday.seconds * 1000 | date }} </mat-label>
       <mat-label>{{ user.email }} </mat-label>
       <mat-label>{{ user.name }} </mat-label>
       <mat-label>{{ user.number }} </mat-label>
-      <mat-label>{{ user.passsword }} </mat-label>
+      <mat-label>{{ user.password }} </mat-label>
       <mat-label>{{ user.role }} </mat-label>
     </mat-list-item>
   </mat-list>

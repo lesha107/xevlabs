@@ -7,6 +7,7 @@ import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { UserService } from 'src/app/services/user.service';
 import { ToastrService } from 'ngx-toastr';
+import { SignIn } from 'src/app/models/UserOptions';
 
 @Component({
   selector: 'app-auth',
@@ -17,8 +18,7 @@ export class AuthComponent {
   constructor(
     private _router: Router,
     private _authService: AuthService,
-    private _userService: UserService,
-    private _toastr: ToastrService
+    private _userService: UserService
   ) {}
 
   form = new FormGroup({});
@@ -55,18 +55,14 @@ export class AuthComponent {
     }
   }
 
-  signInWithPassword(data: { email: string; password?: string }) {
+  signInWithPassword(data: SignIn) {
     return this._authService.signIn(data).pipe(
       tap((data) => {
         this._userService.currentUser$.next(data.user);
       }),
       catchError((er) => {
-        this.showError();
         return throwError(er);
       })
     );
-  }
-  public showError(): void {
-    this._toastr.error('uve got a bad role');
   }
 }

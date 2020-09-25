@@ -5,7 +5,7 @@ import {
   AngularFirestore,
   AngularFirestoreCollection,
 } from '@angular/fire/firestore';
-import { UserOptions } from '../models/UserOptions';
+import { SignIn, UserOptions } from '../models/UserOptions';
 // import ActionCodeSettings = firebase.auth.ActionCodeSettings;
 @Injectable({
   providedIn: 'root',
@@ -16,10 +16,7 @@ export class AuthService {
     private _afs: AngularFirestore
   ) {}
 
-  signIn(data: {
-    email: string;
-    password?: string;
-  }): Observable<Partial<firebase.auth.UserCredential>> {
+  signIn(data: SignIn): Observable<Partial<firebase.auth.UserCredential>> {
     return from(
       this._afAuth.signInWithEmailAndPassword(data.email, data.password)
     );
@@ -28,14 +25,15 @@ export class AuthService {
   createUser(
     data: UserOptions
   ): Observable<Partial<firebase.auth.UserCredential>> {
-    console.log('data', data);
     return from(
       this._afAuth.createUserWithEmailAndPassword(data.email, data.password)
     );
   }
 
-  updateUsersData(data, options) {
-    console.log('yeah', data);
+  updateUsersData(
+    data: Partial<firebase.auth.UserCredential>,
+    options: UserOptions
+  ): void {
     this._afs.collection('users').doc(data.user.uid).set(options);
   }
 }

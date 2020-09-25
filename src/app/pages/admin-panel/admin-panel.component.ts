@@ -1,40 +1,24 @@
 import { Component, OnInit } from '@angular/core';
+import { AngularFirestoreCollection } from '@angular/fire/firestore';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { User } from 'firebase';
-import { combineLatest, Observable, Subject, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  Observable,
+  Subject,
+  throwError,
+} from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
-import { UserOptions } from 'src/app/models/UserOptions';
+import { FilterDate } from 'src/app/models/date';
+import { PaginationEvent } from 'src/app/models/pagination';
+import { responsedUserOptions, UserOptions } from 'src/app/models/UserOptions';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user.service';
-
-// const roleSubject = new Subject();
-// const dateSubject = new Subject();
-// const pagintationSubject = new Subject<any>();
-
-// const originalItems$ = new Observable<any[]>();
-
-// const filteredItems$ = combineLatest([
-//   originalItems$,
-//   roleSubject,
-//   dateSubject,
-// ]).pipe(
-//   map(([originalItems, role, date]) =>
-//     originalItems.filter((item) => item.role === role && item.date === date)
-//   )
-// );
-
-// const paginatedItems$ = combineLatest([
-//   filteredItems$,
-//   pagintationSubject,
-// ]).pipe(
-//   map(([filteredItems, pagination]) =>
-//     filteredItems.splice(pagination.page * pagination.per_page, pagination.limit)
-//   )
-// );
 
 @UntilDestroy()
 @Component({
@@ -43,89 +27,108 @@ import { UserService } from 'src/app/services/user.service';
   styleUrls: ['./admin-panel.component.scss'],
 })
 export class AdminPanelComponent implements OnInit {
-  usersList: any[];
-  paginationList: any[];
   filterType: string;
   campaignOne: FormGroup;
   date: any;
-  //_____________
-  roleSubject = new Subject();
-  dateSubject = new Subject();
-  pagintationSubject = new Subject<any>();
-  originalItems$ = new Observable<any>();
+
+  public readonly roleSubject: BehaviorSubject<string>;
+  public readonly dateSubject: BehaviorSubject<FilterDate>;
+  public readonly paginationSubject: Subject<PaginationEvent>;
+
+  public readonly originalItems$: Observable<responsedUserOptions[]>;
+  public readonly filteredItems$: Observable<responsedUserOptions[]>;
+  public readonly paginatedItems$: Observable<responsedUserOptions[]>;
 
   constructor(
     private _userService: UserService,
     private _authService: AuthService,
     public dialog: MatDialog
   ) {
-    // this._userService.getUsers().subscribe((e) => {
-    //   this.usersList = [...e];
-    //   this.OnPageChange({
-    //     length: 0,
-    //     pageIndex: 0,
-    //     pageSize: 1,
-    //     previousPageIndex: 0,
-    //   });
-    // });
-    this.originalItems$ = this._userService.getUsers();
+    this.roleSubject = new BehaviorSubject(null);
+    this.dateSubject = new BehaviorSubject(null);
+    this.paginationSubject = new Subject<any>();
 
-    this.roleSubject.next(this.filterType);
-    this.dateSubject.next(this.date);
+    this.originalItems$ = this._userService.getUsers();
+    this.filteredItems$ = this.getFilteredItems();
+    this.paginatedItems$ = this.getPaginatedItems();
 
     const today = new Date();
     const month = today.getMonth();
     const year = today.getFullYear();
 
     this.campaignOne = new FormGroup({
-      start: new FormControl(new Date(year, month, 13)),
-      end: new FormControl(new Date(year, month, 16)),
+      start: new FormControl(new Date(year, month, 1)),
+      end: new FormControl(new Date(year, month, 28)),
     });
 
-    this.campaignOne.valueChanges.subscribe((e) => (this.date = e));
+    this.campaignOne.valueChanges.subscribe((e) => this.dateSubject.next(e));
   }
-
   ngOnInit(): void {
-    const filteredItems$ = combineLatest([
+    this.roleSubject.next(this.filterType);
+    this.dateSubject.next(this.date);
+  }
+  private getFilteredItems(): any {
+    return combineLatest([
       this.originalItems$,
       this.roleSubject,
       this.dateSubject,
-    ])
-      .pipe(
-        tap((e) => console.log('tap', e)),
-        map(([originalItems, role, date]) =>
-          originalItems.filter(
-            (item) => item.role === role && item.date === date
-          )
-        )
-      )
-      .subscribe((e) => console.log('combine', e));
+    ]).pipe(
+      map(([originalItems, role, date]) => {
+        originalItems.filter((item) => {
+          if (role !== undefined) {
+            return item.role === role;
+          }
+        });
+        return originalItems.filter((item) => {
+          if (date !== undefined) {
+            return (
+              item.birthday.seconds * 1000 >= new Date(date.start).getTime() &&
+              item.birthday.seconds * 1000 <= new Date(date.end).getTime()
+            );
+          }
+          return true;
+        });
+      }),
+      tap(() => {
+        this.paginationSubject.next({
+          length: 0,
+          pageIndex: 0,
+          pageSize: 1,
+          previousPageIndex: 0,
+        });
+      })
+    );
+  }
+  private getPaginatedItems(): Observable<responsedUserOptions[]> {
+    return combineLatest([this.filteredItems$, this.paginationSubject]).pipe(
+      map(([filteredItems, pagination]) => {
+        return [...filteredItems].splice(
+          pagination.pageIndex * pagination.pageSize,
+          pagination.pageSize
+        );
+      })
+    );
   }
 
-  openDialog(): void {
+  public openDialog(): void {
     const dialogRef = this.dialog.open(DialogComponent, {
       data: {},
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      console.log('The dialog was closed', result);
-      if (result.name) {
+      if (result.firstName) {
         this.createUser(result);
       }
     });
   }
 
-  OnPageChange(event: PageEvent) {
-    const arr = [...this.usersList];
-    console.log('event', event);
-    console.log('event', this.usersList);
-    this.paginationList = arr.splice(
-      event.pageIndex * event.pageSize,
-      event.pageSize
-    );
+  public OnPageChange(event: PaginationEvent): void {
+    this.paginationSubject.next(event);
   }
-
-  createUser(userOption) {
+  public onChangeRole(event): void {
+    this.roleSubject.next(event.value);
+  }
+  public createUser(userOption): void {
     this._authService
       .createUser(userOption)
       .pipe(
