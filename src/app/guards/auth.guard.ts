@@ -10,8 +10,8 @@ import { UserService } from '../services/user.service';
 export class AuthGuard implements CanActivate {
   constructor(
     private readonly _userService: UserService,
-    private _toastr: ToastrService,
-    private _router: Router
+    private readonly _toastr: ToastrService,
+    private readonly _router: Router
   ) {}
 
   canActivate(): Observable<boolean> {
@@ -21,7 +21,6 @@ export class AuthGuard implements CanActivate {
         if (!role) {
           this._router.navigate(['signIn']);
           this.showError();
-          return of(false);
         }
       })
     );

@@ -8,55 +8,68 @@ import { throwError } from 'rxjs';
 import { UserService } from 'src/app/services/user.service';
 import { ToastrService } from 'ngx-toastr';
 import { SignIn } from 'src/app/models/UserOptions';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
+@UntilDestroy()
 @Component({
   selector: 'app-auth',
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.scss'],
 })
 export class AuthComponent {
+  public readonly form: FormGroup;
+  public readonly model?;
+  public readonly options: FormlyFormOptions;
+  public readonly fields: FormlyFieldConfig[];
+
   constructor(
     private _router: Router,
     private _authService: AuthService,
     private _userService: UserService
-  ) {}
+  ) {
+    this.form = new FormGroup({});
+    this.options = {};
+    this.fields = this.getFormlyFields();
+  }
 
-  form = new FormGroup({});
-  model: any = {};
-  options: FormlyFormOptions = {};
-  fields: FormlyFieldConfig[] = [
-    {
-      key: 'email',
-      type: 'input',
-      templateOptions: {
-        label: 'Email',
-        placeholder: 'Write email...',
-        description: 'Description',
-        required: true,
+  getFormlyFields() {
+    return [
+      {
+        key: 'email',
+        type: 'input',
+        templateOptions: {
+          label: 'Email',
+          placeholder: 'Write email...',
+          description: 'Description',
+          required: true,
+        },
       },
-    },
-    {
-      key: 'password',
-      type: 'input',
-      templateOptions: {
-        label: 'Password',
-        placeholder: 'Write password...',
-        description: 'Description',
-        required: true,
+      {
+        key: 'password',
+        type: 'input',
+        templateOptions: {
+          label: 'Password',
+          placeholder: 'Write password...',
+          description: 'Description',
+          required: true,
+        },
       },
-    },
-  ];
+    ];
+  }
 
   onSubmit(): void {
-    if (this.form.valid) {
-      this.signInWithPassword(this.form.value).subscribe(() => {
-        this._router.navigate(['admin']);
-      });
+    if (!this.form.valid) {
+      return;
     }
+
+    this.signInWithPassword(this.form.value).subscribe(() => {
+      this._router.navigate(['admin']);
+    });
   }
 
   signInWithPassword(data: SignIn) {
     return this._authService.signIn(data).pipe(
+      untilDestroyed(this),
       tap((data) => {
         this._userService.currentUser$.next(data.user);
       }),

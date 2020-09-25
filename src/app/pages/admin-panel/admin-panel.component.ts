@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { AngularFirestoreCollection } from '@angular/fire/firestore';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { PageEvent } from '@angular/material/paginator';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { User } from 'firebase';
 import {
   BehaviorSubject,
   combineLatest,
@@ -16,7 +13,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import { FilterDate } from 'src/app/models/date';
 import { PaginationEvent } from 'src/app/models/pagination';
-import { responsedUserOptions, UserOptions } from 'src/app/models/UserOptions';
+import { responsedUserOptions } from 'src/app/models/UserOptions';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user.service';
 
@@ -75,19 +72,13 @@ export class AdminPanelComponent implements OnInit {
     ]).pipe(
       map(([originalItems, role, date]) => {
         originalItems.filter((item) => {
-          if (role !== undefined) {
+          if (role) {
             return item.role === role;
           }
         });
-        return originalItems.filter((item) => {
-          if (date !== undefined) {
-            return (
-              item.birthday.seconds * 1000 >= new Date(date.start).getTime() &&
-              item.birthday.seconds * 1000 <= new Date(date.end).getTime()
-            );
-          }
-          return true;
-        });
+        return originalItems.filter(({ birthday: { seconds } }) => 
+          date ? seconds * 1000 >= new Date(date.start).getTime() && seconds * 1000 <= new Date(date.end).getTime() : true
+        );
       }),
       tap(() => {
         this.paginationSubject.next({
@@ -115,14 +106,14 @@ export class AdminPanelComponent implements OnInit {
       data: {},
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().pipe(untilDestroyed(this)).subscribe((result) => {
       if (result.firstName) {
         this.createUser(result);
       }
     });
   }
 
-  public OnPageChange(event: PaginationEvent): void {
+  public onPageChange(event: PaginationEvent): void {
     this.paginationSubject.next(event);
   }
   public onChangeRole(event): void {
