@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+<<<<<<< HEAD
 import { AngularFirestoreCollection } from '@angular/fire/firestore';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+=======
+import { FormControl, FormGroup } from '@angular/forms';
+>>>>>>> 441e249b5f34f0d1aa566474afb6cda23c7f94b2
 import { MatDialog } from '@angular/material/dialog';
-import { PageEvent } from '@angular/material/paginator';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { User } from 'firebase';
 import {
   BehaviorSubject,
   combineLatest,
@@ -16,7 +18,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import { FilterDate } from 'src/app/models/date';
 import { PaginationEvent } from 'src/app/models/pagination';
-import { responsedUserOptions, UserOptions } from 'src/app/models/UserOptions';
+import { responsedUserOptions } from 'src/app/models/UserOptions';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user.service';
 import { options } from './selectOptions';
@@ -96,6 +98,7 @@ export class AdminPanelComponent implements OnInit {
       this.dateSubject,
     ]).pipe(
       map(([originalItems, role, date]) => {
+<<<<<<< HEAD
         // console.log('role1', role);
         // originalItems.filter((item) => {
         //   if (role !== undefined) {
@@ -121,6 +124,16 @@ export class AdminPanelComponent implements OnInit {
             }
             return true;
           });
+=======
+        originalItems.filter((item) => {
+          if (role) {
+            return item.role === role;
+          }
+        });
+        return originalItems.filter(({ birthday: { seconds } }) => 
+          date ? seconds * 1000 >= new Date(date.start).getTime() && seconds * 1000 <= new Date(date.end).getTime() : true
+        );
+>>>>>>> 441e249b5f34f0d1aa566474afb6cda23c7f94b2
       }),
       tap(() => {
         this.paginationSubject.next({
@@ -149,14 +162,19 @@ export class AdminPanelComponent implements OnInit {
       data: {},
     });
 
+<<<<<<< HEAD
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.firstName) {
+=======
+    dialogRef.afterClosed().pipe(untilDestroyed(this)).subscribe((result) => {
+      if (result.firstName) {
+>>>>>>> 441e249b5f34f0d1aa566474afb6cda23c7f94b2
         this.createUser(result);
       }
     });
   }
 
-  public OnPageChange(event: PaginationEvent): void {
+  public onPageChange(event: PaginationEvent): void {
     this.paginationSubject.next(event);
   }
   public onChangeRole(event): void {

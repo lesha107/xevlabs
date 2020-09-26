@@ -1,12 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, from, Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { AngularFireAuth } from '@angular/fire/auth';
 import {
   AngularFirestore,
-  AngularFirestoreCollection,
 } from '@angular/fire/firestore';
 import { SignIn, UserOptions } from '../models/UserOptions';
-// import ActionCodeSettings = firebase.auth.ActionCodeSettings;
 @Injectable({
   providedIn: 'root',
 })

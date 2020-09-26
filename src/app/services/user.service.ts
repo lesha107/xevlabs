@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/auth';
 import {
   AngularFirestore,
-  AngularFirestoreCollection,
-  AngularFirestoreDocument,
 } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
@@ -14,9 +11,13 @@ import { initFirestoreData } from '../utils/firestore';
   providedIn: 'root',
 })
 export class UserService {
-  public currentUser$ = new BehaviorSubject<firebase.User>(null);
-  public userList$ = new BehaviorSubject<firebase.User[]>(null);
-  constructor(private _afs: AngularFirestore) {}
+  public currentUser$: BehaviorSubject<firebase.User>;
+  public userList$: BehaviorSubject<firebase.User[]>;
+
+  constructor(private _afs: AngularFirestore) {
+    this.currentUser$ = new BehaviorSubject(null);
+    this.userList$ = new BehaviorSubject(null);
+  }
 
   getUsers(): Observable<responsedUserOptions[]> {
     return this._afs

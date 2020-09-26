@@ -62,7 +62,7 @@
   <mat-paginator
     [length]="(filteredItems$ | async)?.length"
     [pageSizeOptions]="[1, 2, 3]"
-    (page)="OnPageChange($event)"
+    (page)="onPageChange($event)"
   >
     ></mat-paginator
   >

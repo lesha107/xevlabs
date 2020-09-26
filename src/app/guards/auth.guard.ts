@@ -12,8 +12,8 @@ export class AuthGuard implements CanActivate {
   isUser: firebase.User | null;
   constructor(
     private readonly _userService: UserService,
-    private _toastr: ToastrService,
-    private _router: Router
+    private readonly _toastr: ToastrService,
+    private readonly _router: Router
   ) {}
 
   canActivate(): Observable<boolean> {
@@ -28,7 +28,6 @@ export class AuthGuard implements CanActivate {
         console.log('shit', role);
         if (!role) {
           this.showError();
-          return of(false);
         }
       })
     );
