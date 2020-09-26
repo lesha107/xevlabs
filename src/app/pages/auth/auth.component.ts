@@ -22,22 +22,13 @@ import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.scss'],
 })
-<<<<<<< HEAD
 export class AuthComponent implements OnInit {
   @ViewChild(ToastContainerDirective, { static: true })
   toastContainer: ToastContainerDirective;
-=======
-export class AuthComponent {
-  public readonly form: FormGroup;
-  public readonly model?;
-  public readonly options: FormlyFormOptions;
-  public readonly fields: FormlyFieldConfig[];
->>>>>>> 441e249b5f34f0d1aa566474afb6cda23c7f94b2
 
   constructor(
     private _router: Router,
     private _authService: AuthService,
-<<<<<<< HEAD
     private _userService: UserService,
     private _toastr: ToastrService
   ) {}
@@ -70,40 +61,6 @@ export class AuthComponent {
   ngOnInit(): void {
     this._toastr.overlayContainer = this.toastContainer;
   }
-=======
-    private _userService: UserService
-  ) {
-    this.form = new FormGroup({});
-    this.options = {};
-    this.fields = this.getFormlyFields();
-  }
-
-  getFormlyFields() {
-    return [
-      {
-        key: 'email',
-        type: 'input',
-        templateOptions: {
-          label: 'Email',
-          placeholder: 'Write email...',
-          description: 'Description',
-          required: true,
-        },
-      },
-      {
-        key: 'password',
-        type: 'input',
-        templateOptions: {
-          label: 'Password',
-          placeholder: 'Write password...',
-          description: 'Description',
-          required: true,
-        },
-      },
-    ];
-  }
-
->>>>>>> 441e249b5f34f0d1aa566474afb6cda23c7f94b2
   onSubmit(): void {
     if (!this.form.valid) {
       return;

@@ -1,10 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-<<<<<<< HEAD
 import { AngularFirestoreCollection } from '@angular/fire/firestore';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-=======
-import { FormControl, FormGroup } from '@angular/forms';
->>>>>>> 441e249b5f34f0d1aa566474afb6cda23c7f94b2
 import { MatDialog } from '@angular/material/dialog';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import {
@@ -98,7 +94,6 @@ export class AdminPanelComponent implements OnInit {
       this.dateSubject,
     ]).pipe(
       map(([originalItems, role, date]) => {
-<<<<<<< HEAD
         // console.log('role1', role);
         // originalItems.filter((item) => {
         //   if (role !== undefined) {
@@ -124,16 +119,6 @@ export class AdminPanelComponent implements OnInit {
             }
             return true;
           });
-=======
-        originalItems.filter((item) => {
-          if (role) {
-            return item.role === role;
-          }
-        });
-        return originalItems.filter(({ birthday: { seconds } }) => 
-          date ? seconds * 1000 >= new Date(date.start).getTime() && seconds * 1000 <= new Date(date.end).getTime() : true
-        );
->>>>>>> 441e249b5f34f0d1aa566474afb6cda23c7f94b2
       }),
       tap(() => {
         this.paginationSubject.next({
@@ -162,13 +147,8 @@ export class AdminPanelComponent implements OnInit {
       data: {},
     });
 
-<<<<<<< HEAD
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.firstName) {
-=======
-    dialogRef.afterClosed().pipe(untilDestroyed(this)).subscribe((result) => {
-      if (result.firstName) {
->>>>>>> 441e249b5f34f0d1aa566474afb6cda23c7f94b2
         this.createUser(result);
       }
     });
