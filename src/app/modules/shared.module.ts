@@ -5,6 +5,9 @@ import { FormlyMaterialModule } from '@ngx-formly/material';
 import { FormlyModule } from '@ngx-formly/core';
 import { RouterModule } from '@angular/router';
 import { MaterialModule } from './material.module';
+import { FormlyMatDatepickerModule } from '@ngx-formly/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { SHARED_COMPONENTS } from '../components/shared';
 export const SHARED_IMPORTS = [
   CommonModule,
   RouterModule,
@@ -13,8 +16,10 @@ export const SHARED_IMPORTS = [
   MaterialModule,
   FormlyModule,
   FormlyMaterialModule,
+  MatNativeDateModule,
+  FormlyMatDatepickerModule,
 ];
-export const SHARED_DECLARATIONS = [];
+export const SHARED_DECLARATIONS = [...SHARED_COMPONENTS];
 export const SHARED_EXPORTS = [...SHARED_IMPORTS, ...SHARED_DECLARATIONS];
 export const SHARED_PROVIDERS = [];
 

@@ -1,11 +1,19 @@
-<form [formGroup]="form">
-  <formly-form
-    [model]="model"
-    [fields]="fields"
-    [options]="options"
-    [form]="form"
-  ></formly-form>
-  <button type="submit" mat-raised-button color="primary" (click)="onSubmit()">
-    Submit
-  </button>
-</form>
+<div class="auth__form">
+  <form [formGroup]="form">
+    <formly-form
+      [model]="model"
+      [fields]="fields"
+      [options]="options"
+      [form]="form"
+    ></formly-form>
+    <button
+      type="submit"
+      mat-raised-button
+      color="primary"
+      (click)="onSubmit()"
+    >
+      Submit
+    </button>
+    <div toastContainer></div>
+  </form>
+</div>

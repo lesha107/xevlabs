@@ -1,4 +1,10 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
@@ -6,7 +12,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { UserService } from 'src/app/services/user.service';
-import { ToastrService } from 'ngx-toastr';
+import { ToastContainerDirective, ToastrService } from 'ngx-toastr';
 import { SignIn } from 'src/app/models/UserOptions';
 
 @Component({
@@ -14,11 +20,15 @@ import { SignIn } from 'src/app/models/UserOptions';
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.scss'],
 })
-export class AuthComponent {
+export class AuthComponent implements OnInit {
+  @ViewChild(ToastContainerDirective, { static: true })
+  toastContainer: ToastContainerDirective;
+
   constructor(
     private _router: Router,
     private _authService: AuthService,
-    private _userService: UserService
+    private _userService: UserService,
+    private _toastr: ToastrService
   ) {}
 
   form = new FormGroup({});
@@ -31,7 +41,6 @@ export class AuthComponent {
       templateOptions: {
         label: 'Email',
         placeholder: 'Write email...',
-        description: 'Description',
         required: true,
       },
     },
@@ -41,12 +50,15 @@ export class AuthComponent {
       templateOptions: {
         label: 'Password',
         placeholder: 'Write password...',
-        description: 'Description',
+        type: 'password',
         required: true,
+        asdsadass: 'asdasdsad',
       },
     },
   ];
-
+  ngOnInit(): void {
+    this._toastr.overlayContainer = this.toastContainer;
+  }
   onSubmit(): void {
     if (this.form.valid) {
       this.signInWithPassword(this.form.value).subscribe(() => {
@@ -61,8 +73,12 @@ export class AuthComponent {
         this._userService.currentUser$.next(data.user);
       }),
       catchError((er) => {
+        this.showError(er.message);
         return throwError(er);
       })
     );
+  }
+  public showError(er): void {
+    this._toastr.error(er);
   }
 }

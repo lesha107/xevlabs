@@ -9,7 +9,8 @@ import { FormlyMaterialModule } from '@ngx-formly/material';
 import { AuthGuard } from './guards/auth.guard';
 import { FirebaseModule } from './modules/firebase.module';
 import { SharedModule } from './modules/shared.module';
-import { ToastrModule } from 'ngx-toastr';
+import { ToastContainerModule, ToastrModule } from 'ngx-toastr';
+import { FORMLY_CONFIGS } from './configs/formly.configs';
 
 @NgModule({
   declarations: [AppComponent],
@@ -19,11 +20,7 @@ import { ToastrModule } from 'ngx-toastr';
     FirebaseModule,
     AppRoutingModule,
     SharedModule,
-    FormlyModule.forRoot({
-      validationMessages: [
-        { name: 'required', message: 'This field is required' },
-      ],
-    }),
+    FormlyModule.forRoot(FORMLY_CONFIGS),
     ToastrModule.forRoot(),
   ],
   providers: [AuthGuard],

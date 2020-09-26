@@ -1,5 +1,5 @@
 <form [formGroup]="form" (ngSubmit)="submit()">
-  <div mat-dialog-content>
+  <!-- <div mat-dialog-content>
     <mat-form-field>
       <mat-label>First Name</mat-label>
       <input matInput formControlName="firstName" />
@@ -29,7 +29,13 @@
         <mat-option value="user">user</mat-option>
       </mat-select>
     </mat-form-field>
-  </div>
+  </div> -->
+  <formly-form
+    [model]="model"
+    [fields]="fields"
+    [options]="options"
+    [form]="form"
+  ></formly-form>
   <div mat-dialog-actions>
     <button mat-button (click)="onNoClick()">No Thanks</button>
     <button mat-button [mat-dialog-close]="data" cdkFocusInitial type="submit">

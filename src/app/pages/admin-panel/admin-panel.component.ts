@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFirestoreCollection } from '@angular/fire/firestore';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
@@ -19,6 +19,7 @@ import { PaginationEvent } from 'src/app/models/pagination';
 import { responsedUserOptions, UserOptions } from 'src/app/models/UserOptions';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user.service';
+import { options } from './selectOptions';
 
 @UntilDestroy()
 @Component({
@@ -27,6 +28,14 @@ import { UserService } from 'src/app/services/user.service';
   styleUrls: ['./admin-panel.component.scss'],
 })
 export class AdminPanelComponent implements OnInit {
+  public form;
+  public fields = [
+    {
+      key: 'role',
+      type: 'my-select',
+    },
+  ];
+
   filterType: string;
   campaignOne: FormGroup;
   date: any;
@@ -39,11 +48,22 @@ export class AdminPanelComponent implements OnInit {
   public readonly filteredItems$: Observable<responsedUserOptions[]>;
   public readonly paginatedItems$: Observable<responsedUserOptions[]>;
 
+  public paginatedItems: responsedUserOptions[];
+  public readonly displayedColumns: string[];
+  public readonly options: string[];
+
+  public dataSource = [];
   constructor(
     private _userService: UserService,
     private _authService: AuthService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    public formBuilder: FormBuilder
   ) {
+    this.form = formBuilder.group({
+      role: [''],
+    });
+    this.options = options;
+    this.displayedColumns = ['name', 'number', 'email', 'role', 'birthday'];
     this.roleSubject = new BehaviorSubject(null);
     this.dateSubject = new BehaviorSubject(null);
     this.paginationSubject = new Subject<any>();
@@ -66,6 +86,8 @@ export class AdminPanelComponent implements OnInit {
   ngOnInit(): void {
     this.roleSubject.next(this.filterType);
     this.dateSubject.next(this.date);
+    this.form.get('role').valueChanges.subscribe((x) => console.log('X', x));
+    console.log(this.form.controls);
   }
   private getFilteredItems(): any {
     return combineLatest([
@@ -74,20 +96,31 @@ export class AdminPanelComponent implements OnInit {
       this.dateSubject,
     ]).pipe(
       map(([originalItems, role, date]) => {
-        originalItems.filter((item) => {
-          if (role !== undefined) {
-            return item.role === role;
-          }
-        });
-        return originalItems.filter((item) => {
-          if (date !== undefined) {
-            return (
-              item.birthday.seconds * 1000 >= new Date(date.start).getTime() &&
-              item.birthday.seconds * 1000 <= new Date(date.end).getTime()
-            );
-          }
-          return true;
-        });
+        // console.log('role1', role);
+        // originalItems.filter((item) => {
+        //   if (role !== undefined) {
+        //     return item.role === role;
+        //   }
+        // });
+        console.log('role2', originalItems);
+
+        return originalItems
+          .filter((item) => {
+            if (role !== undefined) {
+              return item.role === role;
+            }
+            return true;
+          })
+          .filter((item) => {
+            if (date !== undefined) {
+              return (
+                item.birthday.seconds * 1000 >=
+                  new Date(date.start).getTime() &&
+                item.birthday.seconds * 1000 <= new Date(date.end).getTime()
+              );
+            }
+            return true;
+          });
       }),
       tap(() => {
         this.paginationSubject.next({
@@ -102,6 +135,7 @@ export class AdminPanelComponent implements OnInit {
   private getPaginatedItems(): Observable<responsedUserOptions[]> {
     return combineLatest([this.filteredItems$, this.paginationSubject]).pipe(
       map(([filteredItems, pagination]) => {
+        console.log('filterditems', filteredItems);
         return [...filteredItems].splice(
           pagination.pageIndex * pagination.pageSize,
           pagination.pageSize
@@ -116,7 +150,7 @@ export class AdminPanelComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result.firstName) {
+      if (result?.firstName) {
         this.createUser(result);
       }
     });
@@ -126,6 +160,7 @@ export class AdminPanelComponent implements OnInit {
     this.paginationSubject.next(event);
   }
   public onChangeRole(event): void {
+    console.log('work');
     this.roleSubject.next(event.value);
   }
   public createUser(userOption): void {
