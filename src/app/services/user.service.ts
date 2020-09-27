@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
-import {
-  AngularFirestore,
-} from '@angular/fire/firestore';
+import { AngularFirestore } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { filter, map, switchMap, tap } from 'rxjs/operators';
+import { filter, map, switchMap } from 'rxjs/operators';
 import { responsedUserOptions, UserOptions } from '../models/UserOptions';
 import { initFirestoreData } from '../utils/firestore';
 

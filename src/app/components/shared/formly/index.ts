@@ -1,5 +1,5 @@
-import { FormlySelectComponent } from './formly-select/formly-select.component';
+import { FormlyDatePickerComponent } from './formly-date-picker/formly-date-picker.component';
 
-export * from './formly-select/formly-select.component';
+export * from './formly-date-picker/formly-date-picker.component';
 
-export const FORMLY_COMPONENTS = [FormlySelectComponent];
+export const FORMLY_COMPONENTS = [FormlyDatePickerComponent];

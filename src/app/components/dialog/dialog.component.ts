@@ -1,8 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
-import { FormlyFieldSelect } from '@ngx-formly/material/select';
 import { UserOptions } from '../../models/UserOptions';
 
 @Component({
@@ -15,21 +14,12 @@ export class DialogComponent implements OnInit {
   model: any;
   options: FormlyFormOptions;
   fields: FormlyFieldConfig[];
+  isValid: boolean;
   constructor(
-    private _formBuilder: FormBuilder,
     public dialogRef: MatDialogRef<DialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: UserOptions
   ) {}
   ngOnInit(): void {
-    // this.form = this._formBuilder.group({
-    //   firstName: '',
-    //   number: '',
-    //   email: '',
-    //   password: '',
-    //   birthday: '',
-    //   role: '',
-    // });
-
     this.form = new FormGroup({});
     this.model = {};
     this.options = {
@@ -99,6 +89,7 @@ export class DialogComponent implements OnInit {
         },
       },
     ];
+    this.isValid = this.form.valid;
   }
   onNoClick(): void {
     this.dialogRef.close();

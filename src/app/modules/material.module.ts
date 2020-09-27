@@ -25,12 +25,14 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatSortModule } from '@angular/material/sort';
 
 const MATERIAL_EXPORTS = [
   MatGridListModule,
   MatTabsModule,
   MatSliderModule,
   MatFormFieldModule,
+  MatSortModule,
   MatInputModule,
   MatRadioModule,
   MatAutocompleteModule,

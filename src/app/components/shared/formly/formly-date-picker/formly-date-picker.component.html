@@ -1,0 +1,14 @@
+<mat-form-field class="example-form-field" appearance="fill">
+  <mat-label>{{ to.label }}</mat-label>
+  <mat-date-range-input
+    [formGroup]="formGroup"
+    [rangePicker]="datePicker"
+    [comparisonStart]="formGroup.value.start"
+    [comparisonEnd]="formGroup.value.end"
+  >
+    <input matStartDate placeholder="Start date" formControlName="start" />
+    <input matEndDate placeholder="End date" formControlName="end" />
+  </mat-date-range-input>
+  <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+  <mat-date-range-picker #datePicker></mat-date-range-picker>
+</mat-form-field>

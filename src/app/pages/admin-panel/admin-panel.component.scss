@@ -1,6 +1,25 @@
-.user__list {
-  border: 1px solid black;
-}
 table {
   width: 100%;
+}
+::ng-deep {
+  formly-wrapper-mat-form-field {
+    mat-form-field {
+      width: 300px;
+    }
+  }
+  .formly {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+  }
+  .select,
+  .datepicker {
+    display: block;
+    width: 300px;
+  }
+}
+.btn__add {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }

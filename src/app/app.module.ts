@@ -6,7 +6,7 @@ import { FormlyModule } from '@ngx-formly/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FirebaseModule } from './modules/firebase.module';
 import { SharedModule } from './modules/shared.module';
-import { ToastContainerModule, ToastrModule } from 'ngx-toastr';
+import { ToastrModule } from 'ngx-toastr';
 import { FORMLY_CONFIGS } from './configs/formly.configs';
 
 @NgModule({

@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { UserOptions } from '../models/UserOptions';
-import { AuthComponent } from '../pages/auth/auth.component';
 import { UserService } from '../services/user.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class AuthGuard implements CanActivate {
   isUser: firebase.User | null;
   constructor(
@@ -18,14 +19,16 @@ export class AuthGuard implements CanActivate {
 
   canActivate(): Observable<boolean> {
     this.isUser = this._userService.currentUser$.getValue();
+    if (localStorage.getItem('user')) {
+      return of(true);
+    }
     if (!this.isUser) {
       this._router.navigate(['signIn']);
     }
-
     return this._userService.isAdmin().pipe(
       map((options: UserOptions) => options.role === 'admin'),
       tap((role) => {
-        console.log('shit', role);
+        localStorage.setItem('user', 'true');
         if (!role) {
           this.showError();
         }

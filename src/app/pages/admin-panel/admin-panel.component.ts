@@ -1,19 +1,15 @@
-import { Component, OnInit } from '@angular/core';
-import { AngularFirestoreCollection } from '@angular/fire/firestore';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import {
-  BehaviorSubject,
-  combineLatest,
-  Observable,
-  Subject,
-  throwError,
-} from 'rxjs';
+import { FormlyFieldConfig } from '@ngx-formly/core';
+import { BehaviorSubject, combineLatest, Observable, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import { FilterDate } from 'src/app/models/date';
-import { PaginationEvent } from 'src/app/models/pagination';
 import { responsedUserOptions } from 'src/app/models/UserOptions';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user.service';
@@ -25,32 +21,28 @@ import { options } from './selectOptions';
   templateUrl: './admin-panel.component.html',
   styleUrls: ['./admin-panel.component.scss'],
 })
-export class AdminPanelComponent implements OnInit {
-  public form;
-  public fields = [
-    {
-      key: 'role',
-      type: 'my-select',
-    },
-  ];
+export class AdminPanelComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort: MatSort;
+
+  public form: FormGroup;
+  public fields: FormlyFieldConfig[];
 
   filterType: string;
   campaignOne: FormGroup;
-  date: any;
+  date: FilterDate;
 
   public readonly roleSubject: BehaviorSubject<string>;
   public readonly dateSubject: BehaviorSubject<FilterDate>;
-  public readonly paginationSubject: Subject<PaginationEvent>;
 
   public readonly originalItems$: Observable<responsedUserOptions[]>;
   public readonly filteredItems$: Observable<responsedUserOptions[]>;
-  public readonly paginatedItems$: Observable<responsedUserOptions[]>;
 
   public paginatedItems: responsedUserOptions[];
   public readonly displayedColumns: string[];
   public readonly options: string[];
 
-  public dataSource = [];
+  public dataSource: MatTableDataSource<responsedUserOptions>;
   constructor(
     private _userService: UserService,
     private _authService: AuthService,
@@ -59,34 +51,64 @@ export class AdminPanelComponent implements OnInit {
   ) {
     this.form = formBuilder.group({
       role: [''],
+      date: [''],
     });
+    this.fields = [
+      {
+        fieldGroupClassName: 'formly',
+        fieldGroup: [
+          {
+            className: 'select',
+            key: 'role',
+            type: 'select',
+            templateOptions: {
+              label: 'Filter by role',
+              options: [
+                { value: 'admin', label: 'admin' },
+                { value: 'user', label: 'user' },
+                { value: undefined, label: 'All' },
+              ],
+            },
+          },
+          {
+            className: 'datepicker',
+            key: 'date',
+            type: 'date-picker',
+            templateOptions: {
+              label: 'Filter by BirthDay',
+            },
+          },
+        ],
+      },
+    ];
     this.options = options;
     this.displayedColumns = ['name', 'number', 'email', 'role', 'birthday'];
     this.roleSubject = new BehaviorSubject(null);
     this.dateSubject = new BehaviorSubject(null);
-    this.paginationSubject = new Subject<any>();
 
     this.originalItems$ = this._userService.getUsers();
     this.filteredItems$ = this.getFilteredItems();
-    this.paginatedItems$ = this.getPaginatedItems();
-
-    const today = new Date();
-    const month = today.getMonth();
-    const year = today.getFullYear();
-
-    this.campaignOne = new FormGroup({
-      start: new FormControl(new Date(year, month, 1)),
-      end: new FormControl(new Date(year, month, 28)),
-    });
-
-    this.campaignOne.valueChanges.subscribe((e) => this.dateSubject.next(e));
   }
   ngOnInit(): void {
+    this.dataSource = new MatTableDataSource([]);
     this.roleSubject.next(this.filterType);
     this.dateSubject.next(this.date);
-    this.form.get('role').valueChanges.subscribe((x) => console.log('X', x));
-    console.log(this.form.controls);
+    this.form
+      .get('role')
+      .valueChanges.pipe(untilDestroyed(this))
+      .subscribe((x) => this.roleSubject.next(x));
+    this.form.valueChanges.pipe(untilDestroyed(this)).subscribe((x) => {
+      this.dateSubject.next(x.date);
+    });
   }
+  ngAfterViewInit(): void {
+    this.filteredItems$.pipe(untilDestroyed(this)).subscribe((data) => {
+      this.dataSource = new MatTableDataSource(data);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+    });
+  }
+
   private getFilteredItems(): any {
     return combineLatest([
       this.originalItems$,
@@ -94,14 +116,6 @@ export class AdminPanelComponent implements OnInit {
       this.dateSubject,
     ]).pipe(
       map(([originalItems, role, date]) => {
-        // console.log('role1', role);
-        // originalItems.filter((item) => {
-        //   if (role !== undefined) {
-        //     return item.role === role;
-        //   }
-        // });
-        console.log('role2', originalItems);
-
         return originalItems
           .filter((item) => {
             if (role !== undefined) {
@@ -119,25 +133,6 @@ export class AdminPanelComponent implements OnInit {
             }
             return true;
           });
-      }),
-      tap(() => {
-        this.paginationSubject.next({
-          length: 0,
-          pageIndex: 0,
-          pageSize: 1,
-          previousPageIndex: 0,
-        });
-      })
-    );
-  }
-  private getPaginatedItems(): Observable<responsedUserOptions[]> {
-    return combineLatest([this.filteredItems$, this.paginationSubject]).pipe(
-      map(([filteredItems, pagination]) => {
-        console.log('filterditems', filteredItems);
-        return [...filteredItems].splice(
-          pagination.pageIndex * pagination.pageSize,
-          pagination.pageSize
-        );
       })
     );
   }
@@ -154,11 +149,7 @@ export class AdminPanelComponent implements OnInit {
     });
   }
 
-  public onPageChange(event: PaginationEvent): void {
-    this.paginationSubject.next(event);
-  }
   public onChangeRole(event): void {
-    console.log('work');
     this.roleSubject.next(event.value);
   }
   public createUser(userOption): void {

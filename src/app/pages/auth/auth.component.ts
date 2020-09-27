@@ -1,16 +1,10 @@
-import {
-  Component,
-  EventEmitter,
-  OnInit,
-  Output,
-  ViewChild,
-} from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { AuthService } from 'src/app/services/auth.service';
-import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
-import { throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
 import { UserService } from 'src/app/services/user.service';
 import { ToastContainerDirective, ToastrService } from 'ngx-toastr';
 import { SignIn } from 'src/app/models/UserOptions';
@@ -66,18 +60,23 @@ export class AuthComponent implements OnInit {
       return;
     }
 
-    this.signInWithPassword(this.form.value).subscribe(() => {
-      this._router.navigate(['admin']);
-    });
+    this.signInWithPassword(this.form.value)
+      .pipe(untilDestroyed(this))
+      .subscribe(() => {
+        this._router.navigate(['admin']);
+      });
   }
 
-  signInWithPassword(data: SignIn) {
+  signInWithPassword(
+    data: SignIn
+  ): Observable<Partial<firebase.auth.UserCredential>> {
     return this._authService.signIn(data).pipe(
       untilDestroyed(this),
       tap((data) => {
         this._userService.currentUser$.next(data.user);
       }),
       catchError((er) => {
+        localStorage.setItem('user', null);
         this.showError(er.message);
         return throwError(er);
       })
