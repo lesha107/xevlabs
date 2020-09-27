@@ -24,7 +24,7 @@ export class UserService {
       .pipe(map(initFirestoreData));
   }
 
-  isAdmin(): Observable<UserOptions> {
+  getUserOptions(): Observable<UserOptions> {
     return this.currentUser$.pipe(
       filter((user) => !!user?.uid),
       switchMap((user) =>

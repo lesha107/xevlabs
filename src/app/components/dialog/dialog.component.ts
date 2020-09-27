@@ -89,13 +89,16 @@ export class DialogComponent implements OnInit {
         },
       },
     ];
-    this.isValid = this.form.valid;
   }
   onNoClick(): void {
     this.dialogRef.close();
   }
 
   submit(): void {
-    this.dialogRef.close(this.form.value);
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+    } else {
+      this.dialogRef.close(this.form.value);
+    }
   }
 }

@@ -55,32 +55,49 @@ export class AuthComponent implements OnInit {
   ngOnInit(): void {
     this._toastr.overlayContainer = this.toastContainer;
   }
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (!this.form.valid) {
       return;
     }
 
-    this.signInWithPassword(this.form.value)
-      .pipe(untilDestroyed(this))
-      .subscribe(() => {
+    // this.signInWithPassword(this.form.value)
+    //   .pipe(untilDestroyed(this))
+    //   .subscribe(() => {
+    //     this._router.navigate(['admin']);
+    //   });
+    try {
+      await this.signInWithPassword(this.form.value).then(() => {
         this._router.navigate(['admin']);
       });
+    } catch (er) {
+      throwError(er);
+    }
   }
 
-  signInWithPassword(
+  async signInWithPassword(
     data: SignIn
-  ): Observable<Partial<firebase.auth.UserCredential>> {
-    return this._authService.signIn(data).pipe(
-      untilDestroyed(this),
-      tap((data) => {
-        this._userService.currentUser$.next(data.user);
-      }),
-      catchError((er) => {
-        localStorage.setItem('user', null);
-        this.showError(er.message);
-        return throwError(er);
-      })
-    );
+  ): Promise<Partial<firebase.auth.UserCredential>> {
+    try {
+      let credentials = await this._authService.signIn(data);
+      this._userService.currentUser$.next(credentials.user);
+      return credentials;
+    } catch (er) {
+      localStorage.setItem('user', null);
+      this.showError(er.message);
+      throwError(er);
+    }
+
+    // let cred = await this._authService.signIn(data).pipe(
+    //   untilDestroyed(this),
+    //   tap((data) => {
+    //     this._userService.currentUser$.next(data.user);
+    //   }),
+    //   catchError((er) => {
+    //     localStorage.setItem('user', null);
+    //     this.showError(er.message);
+    //     return throwError(er);
+    //   })
+    // );
   }
   public showError(er): void {
     this._toastr.error(er);

@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { from, Observable } from 'rxjs';
 import { AngularFireAuth } from '@angular/fire/auth';
-import {
-  AngularFirestore,
-} from '@angular/fire/firestore';
+import { AngularFirestore } from '@angular/fire/firestore';
 import { SignIn, UserOptions } from '../models/UserOptions';
 @Injectable({
   providedIn: 'root',
@@ -14,17 +12,16 @@ export class AuthService {
     private _afs: AngularFirestore
   ) {}
 
-  signIn(data: SignIn): Observable<Partial<firebase.auth.UserCredential>> {
-    return from(
-      this._afAuth.signInWithEmailAndPassword(data.email, data.password)
-    );
+  signIn(data: SignIn): Promise<Partial<firebase.auth.UserCredential>> {
+    return this._afAuth.signInWithEmailAndPassword(data.email, data.password);
   }
 
   createUser(
     data: UserOptions
-  ): Observable<Partial<firebase.auth.UserCredential>> {
-    return from(
-      this._afAuth.createUserWithEmailAndPassword(data.email, data.password)
+  ): Promise<Partial<firebase.auth.UserCredential>> {
+    return this._afAuth.createUserWithEmailAndPassword(
+      data.email,
+      data.password
     );
   }
 

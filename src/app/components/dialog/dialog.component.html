@@ -7,14 +7,6 @@
   ></formly-form>
   <div mat-dialog-actions>
     <button mat-button (click)="onNoClick()">No Thanks</button>
-    <button
-      mat-button
-      [mat-dialog-close]="data"
-      cdkFocusInitial
-      type="submit"
-      [disabled]="isValid"
-    >
-      Ok
-    </button>
+    <button mat-button cdkFocusInitial type="submit">Ok</button>
   </div>
 </form>

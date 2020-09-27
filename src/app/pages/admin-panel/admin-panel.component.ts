@@ -25,12 +25,13 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
-  public form: FormGroup;
-  public fields: FormlyFieldConfig[];
+  public readonly selectForm: FormGroup;
+  // public readonly form: FormGroup;
+  public readonly dateForm: FormGroup;
 
-  filterType: string;
-  campaignOne: FormGroup;
-  date: FilterDate;
+  // public readonly fields: FormlyFieldConfig[];
+  public readonly selectFields: FormlyFieldConfig[];
+  public readonly dateFields: FormlyFieldConfig[];
 
   public readonly roleSubject: BehaviorSubject<string>;
   public readonly dateSubject: BehaviorSubject<FilterDate>;
@@ -38,8 +39,7 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
   public readonly originalItems$: Observable<responsedUserOptions[]>;
   public readonly filteredItems$: Observable<responsedUserOptions[]>;
 
-  public paginatedItems: responsedUserOptions[];
-  public readonly displayedColumns: string[];
+  public displayedColumns: string[];
   public readonly options: string[];
 
   public dataSource: MatTableDataSource<responsedUserOptions>;
@@ -49,20 +49,28 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
     public dialog: MatDialog,
     public formBuilder: FormBuilder
   ) {
-    this.form = formBuilder.group({
+    // this.form = formBuilder.group({
+    //   role: [''],
+    //   date: [''],
+    // });
+
+    this.selectForm = formBuilder.group({
       role: [''],
+    });
+
+    this.dateForm = formBuilder.group({
       date: [''],
     });
-    this.fields = [
+
+    this.selectFields = [
       {
         fieldGroupClassName: 'formly',
         fieldGroup: [
           {
-            className: 'select',
+            className: 'formly',
             key: 'role',
             type: 'select',
             templateOptions: {
-              label: 'Filter by role',
               options: [
                 { value: 'admin', label: 'admin' },
                 { value: 'user', label: 'user' },
@@ -70,17 +78,46 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
               ],
             },
           },
-          {
-            className: 'datepicker',
-            key: 'date',
-            type: 'date-picker',
-            templateOptions: {
-              label: 'Filter by BirthDay',
-            },
-          },
         ],
       },
     ];
+
+    this.dateFields = [
+      {
+        className: 'datepicker',
+        key: 'date',
+        type: 'date-picker',
+      },
+    ];
+
+    // this.fields = [
+    //   {
+    //     fieldGroupClassName: 'formly',
+    //     fieldGroup: [
+    //       {
+    //         className: 'select',
+    //         key: 'role',
+    //         type: 'select',
+    //         templateOptions: {
+    //           label: 'Filter by role',
+    //           options: [
+    //             { value: 'admin', label: 'admin' },
+    //             { value: 'user', label: 'user' },
+    //             { value: undefined, label: 'All' },
+    //           ],
+    //         },
+    //       },
+    //       {
+    //         className: 'datepicker',
+    //         key: 'date',
+    //         type: 'date-picker',
+    //         templateOptions: {
+    //           label: 'Filter by BirthDay',
+    //         },
+    //       },
+    //     ],
+    //   },
+    // ];
     this.options = options;
     this.displayedColumns = ['name', 'number', 'email', 'role', 'birthday'];
     this.roleSubject = new BehaviorSubject(null);
@@ -91,13 +128,13 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
   }
   ngOnInit(): void {
     this.dataSource = new MatTableDataSource([]);
-    this.roleSubject.next(this.filterType);
-    this.dateSubject.next(this.date);
-    this.form
+    this.roleSubject.next(undefined);
+    this.dateSubject.next(undefined);
+    this.selectForm
       .get('role')
       .valueChanges.pipe(untilDestroyed(this))
       .subscribe((x) => this.roleSubject.next(x));
-    this.form.valueChanges.pipe(untilDestroyed(this)).subscribe((x) => {
+    this.dateForm.valueChanges.pipe(untilDestroyed(this)).subscribe((x) => {
       this.dateSubject.next(x.date);
     });
   }
@@ -152,17 +189,23 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
   public onChangeRole(event): void {
     this.roleSubject.next(event.value);
   }
-  public createUser(userOption): void {
-    this._authService
-      .createUser(userOption)
-      .pipe(
-        tap((data) => {
-          this._authService.updateUsersData(data, userOption);
-        }),
-        catchError((err) => {
-          return throwError(err);
-        })
-      )
-      .subscribe();
+  public async createUser(userOption): Promise<void> {
+    try {
+      let userData = await this._authService.createUser(userOption);
+      this._authService.updateUsersData(userData, userOption);
+    } catch (er) {
+      throwError(er);
+    }
+    //   this._authService
+    //     .createUser(userOption)
+    //     .pipe(
+    //       tap((data) => {
+    //         this._authService.updateUsersData(data, userOption);
+    //       }),
+    //       catchError((err) => {
+    //         return throwError(err);
+    //       })
+    //     )
+    //     .subscribe();
   }
 }

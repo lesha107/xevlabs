@@ -25,7 +25,7 @@ export class AuthGuard implements CanActivate {
     if (!this.isUser) {
       this._router.navigate(['signIn']);
     }
-    return this._userService.isAdmin().pipe(
+    return this._userService.getUserOptions().pipe(
       map((options: UserOptions) => options.role === 'admin'),
       tap((role) => {
         localStorage.setItem('user', 'true');

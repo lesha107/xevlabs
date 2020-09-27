@@ -1,3 +1,19 @@
 mat-form-field {
-  width: 100%;
+  width: 95%;
+}
+::ng-deep {
+  mat-form-field {
+    height: 10px;
+  }
+  .mat-form-field-wrapper {
+    width: 0px;
+  }
+  .mat-form-field-appearance-fill {
+    .mat-form-field-flex {
+      padding: 0px 0px 0px 0px;
+      button {
+        margin-left: 15px;
+      }
+    }
+  }
 }

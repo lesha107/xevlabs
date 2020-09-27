@@ -2,9 +2,17 @@ table {
   width: 100%;
 }
 ::ng-deep {
+  formly-form {
+    border: none;
+    width: 10px;
+    formly-group {
+      width: 100px;
+    }
+  }
+
   formly-wrapper-mat-form-field {
     mat-form-field {
-      width: 300px;
+      width: 0px;
     }
   }
   .formly {
@@ -20,6 +28,18 @@ table {
 }
 .btn__add {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  width: 100%;
   margin-top: 10px;
+}
+.table__wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  .table {
+    width: 90%;
+    margin: 0 auto;
+  }
 }

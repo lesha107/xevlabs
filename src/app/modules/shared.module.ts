@@ -8,11 +8,13 @@ import { MaterialModule } from './material.module';
 import { FormlyMatDatepickerModule } from '@ngx-formly/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { SHARED_COMPONENTS } from '../components/shared';
+import { FirebaseModule } from './firebase.module';
 export const SHARED_IMPORTS = [
   CommonModule,
   RouterModule,
   FormsModule,
   ReactiveFormsModule,
+  FirebaseModule,
   MaterialModule,
   FormlyModule,
   FormlyMaterialModule,
